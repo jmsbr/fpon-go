@@ -1,155 +1,235 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plataforma de Estudos - 4º Ano</title>
+    <title>Aventura do Saber - Jogo de Estudo</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s; }
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-        .fade-in { animation: fadeIn 0.5s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .loading-spinner { border: 3px solid #f3f3f3; border-top: 3px solid #4f46e5; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        body { font-family: 'Fredoka', sans-serif; background-color: #e0f2fe; overflow-x: hidden; }
+        .btn-bounce:active { transform: scale(0.95); }
+        .card-anim { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .card-anim:hover { transform: translateY(-10px); }
+        .progress-bar { transition: width 0.5s ease-in-out; }
+        .floating { animation: floating 3s ease-in-out infinite; }
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .confetti { position: absolute; pointer-events: none; }
+        .gradient-text { background: linear-gradient(to right, #4f46e5, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-800">
+<body class="text-slate-800">
 
-    <div id="app" class="max-w-4xl mx-auto px-4 py-8">
-        <!-- Header -->
-        <header class="flex justify-between items-center mb-8">
-            <div class="flex items-center gap-3">
-                <div class="bg-indigo-600 p-2 rounded-xl text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M8 7h6"/><path d="M8 11h8"/></svg>
+    <div id="app" class="min-h-screen flex flex-col">
+        <!-- Barra Superior -->
+        <nav class="bg-white shadow-md p-4 flex justify-between items-center sticky top-0 z-50">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="showScreen('home')">
+                <span class="text-3xl">🚀</span>
+                <h1 class="text-xl font-bold gradient-text uppercase tracking-wider">Aventura do Saber</h1>
+            </div>
+            <div id="status-bar" class="hidden flex items-center gap-4">
+                <div class="flex items-center gap-1 bg-yellow-100 px-3 py-1 rounded-full border border-yellow-200">
+                    <span class="text-lg">⭐</span>
+                    <span id="star-count" class="font-bold text-yellow-700">0</span>
                 </div>
-                <h1 class="text-xl font-bold text-slate-900 tracking-tight">Estudos 4º Ano</h1>
+                <div class="hidden md:block w-32 h-3 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                    <div id="global-progress" class="h-full bg-green-400 progress-bar" style="width: 0%"></div>
+                </div>
             </div>
-            <div id="score-badge" class="hidden bg-white border border-slate-200 px-4 py-1 rounded-full text-sm font-semibold shadow-sm">
-                Pontos: <span id="current-score" class="text-indigo-600">0</span>
-            </div>
-        </header>
+        </nav>
 
-        <!-- Main Content Area -->
-        <main id="main-container" class="fade-in">
-            <!-- Content will be injected here via JavaScript -->
+        <main class="flex-grow p-4 md:p-8 flex items-center justify-center">
+            
+            <!-- TELA INICIAL -->
+            <section id="screen-home" class="text-center space-y-8 animate-in fade-in duration-700">
+                <div class="floating">
+                    <img src="https://img.icons8.com/clouds/200/rocket.png" alt="Foguete" class="mx-auto">
+                </div>
+                <h2 class="text-4xl md:text-5xl font-bold text-indigo-900 leading-tight">Olá, pequeno explorador!<br><span class="text-pink-500">Pronto para aprender?</span></h2>
+                <p class="text-slate-600 text-xl max-w-lg mx-auto">Vamos estudar para a sua prova de um jeito super divertido!</p>
+                <div class="flex flex-col md:flex-row gap-4 justify-center pt-6">
+                    <button onclick="showScreen('study')" class="btn-bounce bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-5 rounded-3xl font-bold text-2xl shadow-xl shadow-indigo-200 transition-all flex items-center justify-center gap-3">
+                        <span>📖</span> Estudar Conteúdo
+                    </button>
+                    <button onclick="startGame()" class="btn-bounce bg-pink-500 hover:bg-pink-600 text-white px-8 py-5 rounded-3xl font-bold text-2xl shadow-xl shadow-pink-200 transition-all flex items-center justify-center gap-3">
+                        <span>🎮</span> Começar o Jogo
+                    </button>
+                </div>
+            </section>
+
+            <!-- TELA DE ESTUDO (REVISÃO) -->
+            <section id="screen-study" class="hidden w-full max-w-4xl space-y-6">
+                <div class="flex items-center justify-between mb-4">
+                    <button onclick="showScreen('home')" class="text-indigo-600 font-bold flex items-center gap-2 hover:translate-x-[-5px] transition">
+                        ← Voltar ao Início
+                    </button>
+                </div>
+
+                <div class="grid gap-6" id="study-list">
+                    <!-- Cards de estudo injetados via JS -->
+                </div>
+
+                <div class="text-center pt-8">
+                    <button onclick="startGame()" class="bg-green-500 text-white px-12 py-4 rounded-3xl font-bold text-xl shadow-lg hover:bg-green-600 transition">
+                        Já aprendi tudo! Vamos jogar? 🎯
+                    </button>
+                </div>
+            </section>
+
+            <!-- TELA DO JOGO (SIMULADO) -->
+            <section id="screen-game" class="hidden w-full max-w-2xl bg-white rounded-[40px] shadow-2xl p-8 border-8 border-indigo-50 relative overflow-hidden">
+                <!-- Feedback Overlay (Acerto/Erro) -->
+                <div id="feedback-overlay" class="hidden absolute inset-0 z-40 flex items-center justify-center p-8 bg-white/95">
+                    <div class="text-center space-y-6">
+                        <div id="feedback-icon" class="text-8xl"></div>
+                        <h3 id="feedback-title" class="text-3xl font-bold"></h3>
+                        <p id="feedback-msg" class="text-slate-600 text-xl"></p>
+                        <button onclick="nextQuestion()" class="bg-indigo-600 text-white px-10 py-4 rounded-2xl font-bold text-xl shadow-lg hover:bg-indigo-700">
+                            Continuar Aventura!
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center mb-6">
+                    <span id="question-category" class="bg-pink-100 text-pink-600 px-4 py-1 rounded-full text-sm font-bold uppercase tracking-widest"></span>
+                    <span id="question-count" class="font-bold text-slate-400">Questão 1/80</span>
+                </div>
+
+                <div id="question-text" class="text-2xl md:text-3xl font-bold text-slate-800 mb-8 leading-tight"></div>
+
+                <div id="options-grid" class="grid gap-4">
+                    <!-- Opções injetadas via JS -->
+                </div>
+            </section>
+
+            <!-- TELA DE RESULTADOS -->
+            <section id="screen-results" class="hidden text-center space-y-8 animate-in zoom-in duration-500">
+                <div class="text-9xl">🏆</div>
+                <h2 class="text-5xl font-bold text-indigo-900">Uau! Você completou!</h2>
+                <div class="bg-white p-8 rounded-[40px] shadow-xl max-w-md mx-auto space-y-4">
+                    <p class="text-2xl">Você ganhou <span id="final-stars" class="font-bold text-yellow-500"></span> estrelas!</p>
+                    <div id="medal-container" class="text-6xl flex justify-center gap-2"></div>
+                </div>
+                <button onclick="location.reload()" class="bg-indigo-600 text-white px-12 py-4 rounded-3xl font-bold text-xl shadow-lg hover:bg-indigo-700 transition">
+                    Jogar Novamente 🔄
+                </button>
+            </section>
+
         </main>
     </div>
 
-    <!-- Scripts Section -->
-    <script>
-        const apiKey = ""; // Provisioned by environment
-        let state = {
-            view: 'menu', // 'menu', 'study', 'quiz', 'results'
-            score: 0,
-            currentQuestionIndex: 0,
-            userAnswers: [],
-            isAudioLoading: false
-        };
+    <!-- AUDIO PLAYER HIDDEN -->
+    <audio id="global-audio" class="hidden"></audio>
 
-        // --- CONTENT DATA ---
-        const studyTopics = [
+    <script>
+        const apiKey = ""; // Ambiente provisionado
+        let stars = 0;
+        let currentQuestion = 0;
+        let quizData = [];
+        let isAudioPlaying = false;
+
+        const studyData = [
             {
-                title: "Género Textual: Notícia",
-                content: "A notícia é um texto jornalístico que relata factos reais e atuais. Ela é composta por: 1. Manchete (título principal para atrair o leitor), 2. Lide (primeiro parágrafo que resume: Quem? O quê? Onde? Quando?), 3. Corpo (detalhes do evento).",
-                audioText: "A notícia serve para informar. O título, chamado de manchete, deve ser chamativo. O primeiro parágrafo, o lide, responde às perguntas principais sobre o acontecimento."
+                id: 'noticia',
+                title: "O que é uma Notícia? 📰",
+                icon: "🗞️",
+                color: "bg-blue-500",
+                text: "A notícia conta coisas reais que aconteceram hoje ou ontem. Ela tem um título grande chamado Manchete para chamar sua atenção. No começo, ela já responde: Quem fez? O que aconteceu? Onde foi? É como contar um fato importante para os amigos!",
+                audioText: "A notícia é um texto que conta fatos reais do dia a dia. Ela tem a manchete, que é o título chamativo, e o lide, que resume tudo o que aconteceu. Lembre-se: notícia não é inventada!"
             },
             {
-                title: "Substantivos Próprios e Comuns",
-                content: "Substantivos dão nome aos seres. Próprios: nomes específicos de pessoas, cidades ou países (ex: Maria, Lisboa, Brasil). Devem começar com letra maiúscula. Comuns: nomes genéricos de objetos ou animais (ex: caneta, cão, cidade). Usam letra minúscula.",
-                audioText: "Lembre-se: nomes de pessoas e lugares são próprios e começam com letra maiúscula. Objetos do dia a dia são comuns e usam letra minúscula."
+                id: 'nomes',
+                title: "Nomes Próprios e Comuns 🏷️",
+                icon: "📛",
+                color: "bg-green-500",
+                text: "Substantivo é o nome das coisas. Comum é o nome de qualquer um: cachorro, cidade, caneta. Próprio é o nome especial: Totó, São Paulo, Maria. Nomes próprios são muito importantes, por isso começam sempre com a LETRA MAIÚSCULA!",
+                audioText: "Substantivos dão nome a tudo! O substantivo comum é geral, como 'menino'. O próprio é específico, como 'Pedro'. Nomes próprios sempre começam com letra maiúscula, não esqueça!"
             },
             {
-                title: "Adjetivos",
-                content: "Adjetivos são palavras que atribuem características ou qualidades aos substantivos. Exemplo: 'O céu azul' (azul é o adjetivo). Eles ajudam-nos a descrever como algo é.",
-                audioText: "Adjetivos dão cor e detalhe ao nosso mundo. Eles dizem se algo é grande, pequeno, bonito ou inteligente."
+                id: 'adjetivos',
+                title: "Adjetivos: As Qualidades 🎨",
+                icon: "🌟",
+                color: "bg-purple-500",
+                text: "Os adjetivos dão cor e vida às palavras! Eles dizem como as coisas são. O sorvete é GELADO. A flor é CHEIROSA. O herói é CORAJOSO. Toda vez que você dá uma característica para algo, você está usando um adjetivo!",
+                audioText: "Adjetivos são palavras que dão características aos nomes. Por exemplo: maçã vermelha, cachorro brincalhão. Vermelha e brincalhão são os adjetivos!"
             },
             {
-                title: "Combate à Discriminação Racial",
-                content: "Discriminação racial é o ato de tratar alguém de forma diferente ou injusta devido à sua cor de pele ou origem. Combater o racismo é garantir que todos tenham os mesmos direitos e respeito, valorizando a diversidade cultural do Brasil e do mundo.",
-                audioText: "Respeitar todas as raças é fundamental para uma sociedade justa. No Brasil, o combate à discriminação racial é uma luta diária por igualdade e justiça para todos."
+                id: 'respeito',
+                title: "Respeito e Igualdade 🤝",
+                icon: "🌍",
+                color: "bg-amber-500",
+                text: "Combater a discriminação racial é tratar todo mundo com amor e respeito, não importa a cor da pele ou de onde a pessoa veio. Somos todos iguais por dentro e a nossa diversidade é o que faz o mundo ser bonito!",
+                audioText: "O combate à discriminação racial é sobre respeitar todas as pessoas, independentemente da cor da pele. O respeito é a regra mais importante para vivermos bem juntos!"
             }
         ];
 
-        // --- 80 QUESTIONS GENERATOR ---
-        const rawQuestions = [
-            // Português: Notícia
-            { q: "Qual o objetivo principal de uma notícia?", options: ["Divertir", "Informar sobre factos reais", "Contar um conto de fadas", "Ensinar uma receita"], correct: 1, explanation: "Notícias são textos informativos sobre a realidade." },
-            { q: "Como se chama o primeiro parágrafo de uma notícia?", options: ["Título", "Corpo", "Lide", "Resumo"], correct: 2, explanation: "O Lide apresenta as informações principais logo no início." },
-            { q: "A 'Manchete' serve para:", options: ["Atrair a atenção do leitor", "Finalizar o texto", "Pedir desculpas", "Esconder a notícia"], correct: 0, explanation: "A manchete é o título chamativo." },
-            // Português: Substantivos
-            { q: "Qual palavra é um substantivo próprio?", options: ["mesa", "portugal", "livro", "caderno"], correct: 1, explanation: "Portugal é o nome de um país, por isso é próprio." },
-            { q: "Marque o substantivo comum:", options: ["Lisboa", "Maria", "Caneta", "Atlântico"], correct: 2, explanation: "Caneta é um objeto genérico." },
-            { q: "Nomes de cidades devem começar com:", options: ["Letra minúscula", "Letra maiúscula", "Números", "Símbolos"], correct: 1, explanation: "Substantivos próprios exigem letra maiúscula." },
-            // Português: Adjetivos
-            { q: "Na frase 'A maçã é doce', qual é o adjetivo?", options: ["maçã", "é", "doce", "A"], correct: 2, explanation: "Doce caracteriza a maçã." },
-            { q: "Complete com um adjetivo: 'O sol está muito ____ hoje.'", options: ["Correndo", "Quente", "Cadeira", "Azul"], correct: 1, explanation: "Quente descreve o estado do sol." },
-            // História: Discriminação
-            { q: "O que é discriminação racial?", options: ["Respeitar a todos", "Tratar mal por causa da cor da pele", "Fazer novos amigos", "Estudar história"], correct: 1, explanation: "É o tratamento injusto baseado na raça." },
-            { q: "O Brasil é formado por:", options: ["Apenas uma cultura", "Diversas raças e etnias", "Apenas robôs", "Ninguém"], correct: 1, explanation: "A diversidade é a base da população brasileira." },
-            { q: "Combater o racismo é um dever de:", options: ["Apenas dos professores", "Apenas dos políticos", "De todas as pessoas", "De ninguém"], correct: 2, explanation: "Todos devem contribuir para o respeito mútuo." }
-        ];
+        // --- GERADOR DE 80 QUESTÕES ---
+        function generateQuiz() {
+            const baseQuestions = [
+                // PORTUGUÊS - NOTÍCIA
+                { q: "Qual o nome do título de uma notícia?", cat: "Português", opts: ["Manchete", "Rodapé", "Receita", "História"], ans: 0, exp: "A Manchete é o título que brilha no jornal!" },
+                { q: "A notícia conta fatos...", cat: "Português", opts: ["Inventados", "Reais", "Mentirosos", "De mentirinha"], ans: 1, exp: "Notícias sempre falam a verdade!" },
+                { q: "O primeiro parágrafo da notícia se chama:", cat: "Português", opts: ["Lide", "Fim", "Capa", "Desenho"], ans: 0, exp: "O Lide conta o resumo de tudo!" },
+                // GRAMÁTICA - SUBSTANTIVOS
+                { q: "Qual palavra é um nome Próprio?", cat: "Gramática", opts: ["bola", "casa", "Brasil", "gato"], ans: 2, exp: "Brasil é nome de país, por isso é Próprio!" },
+                { q: "Como escrevemos nomes Próprios?", cat: "Gramática", opts: ["Letra Pequena", "Letra Maiúscula", "Com números", "De trás para frente"], ans: 1, exp: "Eles são especiais, merecem letra grande!" },
+                { q: "A palavra 'sapato' é um substantivo:", cat: "Gramática", opts: ["Comum", "Próprio", "Adjetivo", "Verbo"], ans: 0, exp: "Existem muitos sapatos, por isso é comum." },
+                // ADJETIVOS
+                { q: "Qual é o adjetivo na frase: 'O gato é fofinho'?", cat: "Gramática", opts: ["O", "gato", "é", "fofinho"], ans: 3, exp: "Fofinho é como o gato é!" },
+                { q: "Escolha um adjetivo para o SOL:", cat: "Gramática", opts: ["Gelado", "Quente", "Azul", "Quadrado"], ans: 1, exp: "O sol é muito quente!" },
+                // HISTÓRIA
+                { q: "Tratar mal alguém pela cor da pele é:", cat: "História", opts: ["Certo", "Divertido", "Discriminação", "Legal"], ans: 2, exp: "Isso é errado e devemos sempre combater!" },
+                { q: "Devemos tratar todos os amigos com:", cat: "História", opts: ["Respeito", "Grosseria", "Gritos", "Empurrões"], ans: 0, exp: "O respeito faz o mundo melhor!" }
+            ];
 
-        // Expand to 80 questions with variations
-        const questionBank = [];
-        for (let i = 0; i < 80; i++) {
-            const template = rawQuestions[i % rawQuestions.length];
-            questionBank.push({ ...template, id: i });
+            let deck = [];
+            while(deck.length < 80) {
+                const template = baseQuestions[Math.floor(Math.random() * baseQuestions.length)];
+                deck.push({ ...template, id: deck.length });
+            }
+            return deck;
         }
 
-        // --- AUDIO ENGINE ---
-        async function playAudio(text, buttonElement) {
-            if (state.isAudioLoading) return;
-            state.isAudioLoading = true;
-            buttonElement.innerHTML = `<div class="loading-spinner"></div>`;
-
-            const payload = {
-                contents: [{ parts: [{ text }] }],
-                generationConfig: {
-                    responseModalities: ["AUDIO"],
-                    speechConfig: {
-                        voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } }
-                    }
-                }
-            };
+        // --- MOTOR DE ÁUDIO ---
+        async function playTTS(text, btn) {
+            if(isAudioPlaying) return;
+            const originalIcon = btn.innerHTML;
+            btn.innerHTML = "⏳";
+            isAudioPlaying = true;
 
             try {
-                let retryCount = 0;
-                const maxRetries = 5;
-                let response;
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: `Diga de forma carinhosa para uma criança de 8 anos: ${text}` }] }],
+                        generationConfig: {
+                            responseModalities: ["AUDIO"],
+                            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } }
+                        }
+                    })
+                });
 
-                while (retryCount < maxRetries) {
-                    response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    if (response.ok) break;
-                    retryCount++;
-                    await new Promise(res => setTimeout(res, Math.pow(2, retryCount) * 1000));
-                }
-
-                if (!response.ok) throw new Error("Falha no áudio");
-
-                const result = await response.json();
-                const pcmBase64 = result.candidates[0].content.parts[0].inlineData.data;
-                const sampleRate = parseInt(result.candidates[0].content.parts[0].inlineData.mimeType.split('rate=')[1]) || 24000;
+                const data = await response.json();
+                const pcmData = data.candidates[0].content.parts[0].inlineData.data;
+                const audioUrl = pcmToWavUrl(pcmData, 24000);
                 
-                const audioUrl = pcmToWavUrl(pcmBase64, sampleRate);
-                const audio = new Audio(audioUrl);
+                const audio = document.getElementById('global-audio');
+                audio.src = audioUrl;
                 audio.play();
-                audio.onended = () => resetAudioButton(buttonElement);
-            } catch (error) {
-                console.error(error);
-                resetAudioButton(buttonElement);
-            } finally {
-                state.isAudioLoading = false;
+                audio.onended = () => {
+                    btn.innerHTML = originalIcon;
+                    isAudioPlaying = false;
+                };
+            } catch (err) {
+                console.error(err);
+                btn.innerHTML = originalIcon;
+                isAudioPlaying = false;
             }
-        }
-
-        function resetAudioButton(btn) {
-            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg> Ouvir`;
         }
 
         function pcmToWavUrl(base64, sampleRate) {
@@ -157,187 +237,138 @@
             const wavHeader = new ArrayBuffer(44);
             const view = new DataView(wavHeader);
             const writeString = (offset, string) => { for (let i = 0; i < string.length; i++) view.setUint8(offset + i, string.charCodeAt(i)); };
-            writeString(0, 'RIFF');
-            view.setUint32(4, 36 + buffer.byteLength, true);
-            writeString(8, 'WAVE');
-            writeString(12, 'fmt ');
-            view.setUint32(16, 16, true);
-            view.setUint16(20, 1, true);
-            view.setUint16(22, 1, true);
-            view.setUint32(24, sampleRate, true);
-            view.setUint32(28, sampleRate * 2, true);
-            view.setUint16(32, 2, true);
-            view.setUint16(34, 16, true);
-            writeString(36, 'data');
+            writeString(0, 'RIFF'); view.setUint32(4, 36 + buffer.byteLength, true); writeString(8, 'WAVE'); writeString(12, 'fmt ');
+            view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+            view.setUint32(24, sampleRate, true); view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true); view.setUint16(34, 16, true); writeString(36, 'data');
             view.setUint32(40, buffer.byteLength, true);
-            const blob = new Blob([wavHeader, buffer], { type: 'audio/wav' });
-            return URL.createObjectURL(blob);
+            return URL.createObjectURL(new Blob([wavHeader, buffer], { type: 'audio/wav' }));
         }
 
-        // --- NAVIGATION & VIEWS ---
-        function setView(view) {
-            state.view = view;
-            const container = document.getElementById('main-container');
-            const scoreBadge = document.getElementById('score-badge');
+        // --- NAVEGAÇÃO E LÓGICA ---
+        function showScreen(screenId) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`screen-${screenId}`).classList.remove('hidden');
             
-            if (view === 'quiz' || view === 'results') scoreBadge.classList.remove('hidden');
-            else scoreBadge.classList.add('hidden');
+            if(screenId === 'home') document.getElementById('status-bar').classList.add('hidden');
+            else document.getElementById('status-bar').classList.remove('hidden');
 
-            switch(view) {
-                case 'menu': renderMenu(container); break;
-                case 'study': renderStudy(container); break;
-                case 'quiz': renderQuiz(container); break;
-                case 'results': renderResults(container); break;
-            }
+            if(screenId === 'study') renderStudy();
         }
 
-        function renderMenu(container) {
-            container.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div onclick="setView('study')" class="glass-card p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:border-indigo-400 border-2 border-transparent cursor-pointer transition-all group">
-                        <div class="bg-indigo-100 text-indigo-600 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 6 8-4 8 4v10l-8 4-8-4V6Z"/><path d="m12 22v-10l-8-4"/><path d="m12 12 8-4"/></svg>
+        function renderStudy() {
+            const container = document.getElementById('study-list');
+            container.innerHTML = studyData.map(item => `
+                <div class="bg-white p-6 rounded-[32px] shadow-sm border-2 border-slate-100 flex gap-6 items-start card-anim">
+                    <div class="${item.color} text-white p-4 rounded-2xl text-4xl">${item.icon}</div>
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-2xl font-bold text-slate-800">${item.title}</h3>
+                            <button onclick="playTTS('${item.audioText}', this)" class="bg-indigo-50 text-indigo-600 p-3 rounded-full hover:bg-indigo-100 transition">🔊</button>
                         </div>
-                        <h2 class="text-2xl font-bold mb-2">Revisão e Áudio</h2>
-                        <p class="text-slate-500">Aprende o conteúdo com explicações em texto e voz.</p>
-                        <div class="mt-8 flex items-center text-indigo-600 font-bold">Começar <span class="ml-2">→</span></div>
-                    </div>
-                    <div onclick="setView('quiz')" class="glass-card p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:border-emerald-400 border-2 border-transparent cursor-pointer transition-all group">
-                        <div class="bg-emerald-100 text-emerald-600 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v10"/><path d="M18.4 4.6a10 10 0 1 1-12.8 0"/></svg>
-                        </div>
-                        <h2 class="text-2xl font-bold mb-2">Simulado (80 Questões)</h2>
-                        <p class="text-slate-500">Testa os teus conhecimentos e prepara-te para a prova.</p>
-                        <div class="mt-8 flex items-center text-emerald-600 font-bold">Fazer Teste <span class="ml-2">→</span></div>
+                        <p class="text-slate-600 text-lg leading-relaxed">${item.text}</p>
                     </div>
                 </div>
-            `;
+            `).join('');
         }
 
-        function renderStudy(container) {
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <button onclick="setView('menu')" class="text-indigo-600 font-bold flex items-center gap-2 mb-4 hover:underline">
-                        ← Voltar ao Menu
-                    </button>
-                    ${studyTopics.map((topic, i) => `
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 fade-in" style="animation-delay: ${i * 0.1}s">
-                            <div class="flex justify-between items-start mb-4">
-                                <h3 class="text-xl font-bold text-slate-900">${topic.title}</h3>
-                                <button onclick="playAudio('${topic.audioText.replace(/'/g, "\\'")}', this)" class="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-xl text-slate-700 hover:bg-slate-200 transition text-sm font-semibold">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg> Ouvir
-                                </button>
-                            </div>
-                            <p class="text-slate-600 leading-relaxed">${topic.content}</p>
-                        </div>
-                    `).join('')}
-                    <button onclick="setView('quiz')" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-indigo-700 transition shadow-lg shadow-indigo-100">
-                        Começar o Simulado agora!
-                    </button>
-                </div>
-            `;
+        function startGame() {
+            quizData = generateQuiz();
+            currentQuestion = 0;
+            stars = 0;
+            updateStatus();
+            showScreen('game');
+            renderQuestion();
         }
 
-        function renderQuiz(container) {
-            const q = questionBank[state.currentQuestionIndex];
-            container.innerHTML = `
-                <div class="glass-card rounded-3xl shadow-xl p-8 border border-slate-100">
-                    <div class="flex justify-between items-center mb-8">
-                        <span class="text-xs font-bold text-slate-400 tracking-widest uppercase">Questão ${state.currentQuestionIndex + 1} de 80</span>
-                        <div class="w-32 h-2 bg-slate-100 rounded-full overflow-hidden">
-                            <div class="bg-indigo-500 h-full" style="width: ${((state.currentQuestionIndex + 1) / 80) * 100}%"></div>
-                        </div>
-                    </div>
-                    
-                    <h2 class="text-2xl font-bold text-slate-800 mb-8">${q.q}</h2>
-                    
-                    <div id="options-container" class="space-y-4">
-                        ${q.options.map((opt, i) => `
-                            <button onclick="checkAnswer(${i})" class="w-full text-left p-4 rounded-2xl border-2 border-slate-100 hover:border-indigo-400 hover:bg-indigo-50 transition-all font-medium text-slate-700">
-                                ${opt}
-                            </button>
-                        `).join('')}
-                    </div>
+        function renderQuestion() {
+            const q = quizData[currentQuestion];
+            document.getElementById('feedback-overlay').classList.add('hidden');
+            document.getElementById('question-category').innerText = q.cat;
+            document.getElementById('question-count').innerText = `Questão ${currentQuestion + 1} / 80`;
+            document.getElementById('question-text').innerText = q.q;
 
-                    <div id="feedback-area" class="mt-8 hidden p-6 rounded-2xl border-2"></div>
-                </div>
-            `;
+            const grid = document.getElementById('options-grid');
+            grid.innerHTML = q.opts.map((opt, i) => `
+                <button onclick="handleAnswer(${i})" class="group flex items-center gap-4 w-full text-left p-5 rounded-2xl border-4 border-slate-100 hover:border-indigo-400 hover:bg-indigo-50 transition-all">
+                    <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-400 group-hover:bg-indigo-500 group-hover:text-white">${String.fromCharCode(65 + i)}</div>
+                    <span class="text-xl font-bold text-slate-700">${opt}</span>
+                </button>
+            `).join('');
         }
 
-        function checkAnswer(index) {
-            const q = questionBank[state.currentQuestionIndex];
-            const isCorrect = index === q.correct;
-            const feedbackArea = document.getElementById('feedback-area');
-            const optionsBtns = document.querySelectorAll('#options-container button');
-
-            optionsBtns.forEach(btn => btn.disabled = true);
+        function handleAnswer(idx) {
+            const q = quizData[currentQuestion];
+            const isCorrect = idx === q.ans;
             
-            if (isCorrect) {
-                state.score++;
-                document.getElementById('current-score').innerText = state.score;
-                feedbackArea.className = "mt-8 p-6 rounded-2xl border-2 border-emerald-200 bg-emerald-50 text-emerald-800 fade-in";
-                feedbackArea.innerHTML = `<h4 class="font-bold flex items-center gap-2 mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="emerald" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Certo!</h4><p>${q.explanation}</p>`;
-                optionsBtns[index].className += " border-emerald-500 bg-emerald-100 text-emerald-900";
+            const overlay = document.getElementById('feedback-overlay');
+            const icon = document.getElementById('feedback-icon');
+            const title = document.getElementById('feedback-title');
+            const msg = document.getElementById('feedback-msg');
+
+            overlay.classList.remove('hidden');
+            
+            if(isCorrect) {
+                stars += 10;
+                icon.innerText = "⭐";
+                title.innerText = "Incrível!";
+                title.className = "text-3xl font-bold text-green-500";
+                msg.innerText = "Você acertou e ganhou 10 estrelas!";
+                createConfetti();
             } else {
-                feedbackArea.className = "mt-8 p-6 rounded-2xl border-2 border-rose-200 bg-rose-50 text-rose-800 fade-in";
-                feedbackArea.innerHTML = `<h4 class="font-bold flex items-center gap-2 mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rose" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Errado</h4><p>${q.explanation}</p>`;
-                optionsBtns[index].className += " border-rose-500 bg-rose-100 text-rose-900";
-                optionsBtns[q.correct].className += " border-emerald-500 bg-emerald-50";
+                icon.innerText = "💡";
+                title.innerText = "Quase lá!";
+                title.className = "text-3xl font-bold text-amber-500";
+                msg.innerText = q.exp;
             }
-
-            feedbackArea.classList.remove('hidden');
             
-            const nextBtn = document.createElement('button');
-            nextBtn.className = "mt-6 w-full bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-800 transition";
-            nextBtn.innerText = state.currentQuestionIndex < 79 ? "Próxima Questão" : "Ver Resultados";
-            nextBtn.onclick = () => {
-                if (state.currentQuestionIndex < 79) {
-                    state.currentQuestionIndex++;
-                    renderQuiz(document.getElementById('main-container'));
-                } else {
-                    setView('results');
-                }
-            };
-            feedbackArea.appendChild(nextBtn);
+            updateStatus();
         }
 
-        function renderResults(container) {
-            const percentage = Math.round((state.score / 80) * 100);
-            let message = "Podes melhorar!";
-            let iconColor = "text-rose-500";
-            
-            if (percentage >= 80) { message = "Excelente! Estás preparado!"; iconColor = "text-emerald-500"; }
-            else if (percentage >= 50) { message = "Bom trabalho! Revisa mais um pouco."; iconColor = "text-amber-500"; }
-
-            container.innerHTML = `
-                <div class="glass-card rounded-3xl shadow-2xl p-12 text-center">
-                    <div class="inline-block p-6 rounded-full bg-slate-50 mb-6 ${iconColor}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-                    </div>
-                    <h2 class="text-4xl font-bold mb-2">${state.score} / 80</h2>
-                    <p class="text-xl text-slate-500 mb-8">${message}</p>
-                    
-                    <div class="bg-slate-50 p-6 rounded-2xl mb-8 flex justify-around items-center">
-                        <div>
-                            <p class="text-xs font-bold text-slate-400 uppercase">Aproveitamento</p>
-                            <p class="text-2xl font-bold text-indigo-600">${percentage}%</p>
-                        </div>
-                        <div class="h-12 w-px bg-slate-200"></div>
-                        <div>
-                            <p class="text-xs font-bold text-slate-400 uppercase">Status</p>
-                            <p class="text-2xl font-bold text-slate-800">${percentage >= 50 ? 'Aprovado' : 'Revisar'}</p>
-                        </div>
-                    </div>
-
-                    <button onclick="location.reload()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-indigo-700 transition">
-                        Recomeçar Estudos
-                    </button>
-                </div>
-            `;
+        function nextQuestion() {
+            if(currentQuestion < 79) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
         }
 
-        // Initialize App
-        window.onload = () => setView('menu');
+        function showResults() {
+            showScreen('results');
+            document.getElementById('final-stars').innerText = stars;
+            const medals = document.getElementById('medal-container');
+            medals.innerHTML = "";
+            const medalCount = Math.floor(stars / 200) + 1;
+            for(let i=0; i<Math.min(medalCount, 5); i++) {
+                medals.innerHTML += "🥇";
+            }
+        }
+
+        function updateStatus() {
+            document.getElementById('star-count').innerText = stars;
+            document.getElementById('global-progress').style.width = `${((currentQuestion + 1) / 80) * 100}%`;
+        }
+
+        function createConfetti() {
+            for(let i=0; i<20; i++) {
+                const conf = document.createElement('div');
+                conf.innerText = ["🎉", "✨", "⭐", "🎈"][Math.floor(Math.random()*4)];
+                conf.className = "confetti text-2xl";
+                conf.style.left = Math.random() * 100 + "vw";
+                conf.style.top = "-5vh";
+                conf.style.transition = `all ${Math.random() * 2 + 1}s linear`;
+                document.body.appendChild(conf);
+                setTimeout(() => {
+                    conf.style.top = "105vh";
+                    conf.style.transform = `rotate(${Math.random()*360}deg)`;
+                }, 10);
+                setTimeout(() => conf.remove(), 3000);
+            }
+        }
+
+        // Iniciar na Home
+        window.onload = () => showScreen('home');
     </script>
 </body>
 </html>
