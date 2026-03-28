@@ -1,245 +1,380 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aventura do Saber - Jogo Educativo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aventura do Saber - 4º Ano</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Fredoka', sans-serif; background-color: #f0f9ff; }
-        .btn-game { transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .btn-game:active { transform: scale(0.95); }
-        .loading-ring { border: 4px solid #f3f3f3; border-top: 4px solid #6366f1; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        body { font-family: 'Baloo 2', cursive; background-color: #e0f2fe; overflow-x: hidden; touch-action: manipulation; }
+        .btn-game { transition: transform 0.1s; }
+        .btn-game:active { transform: scale(0.92); }
+        .spinner { border: 4px solid rgba(255,255,255,0.3); border-top: 4px solid white; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .message-box { animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
     </style>
 </head>
-<body class="text-slate-800 pb-10">
+<body class="text-slate-800 h-screen flex flex-col">
 
-    <div id="app" class="max-w-4xl mx-auto px-4 pt-6">
-        <!-- Cabeçalho -->
-        <header class="flex justify-between items-center mb-8 bg-white p-4 rounded-3xl shadow-sm border-2 border-indigo-100">
-            <div class="flex items-center gap-3 cursor-pointer" onclick="showScreen('home')">
-                <span class="text-3xl">🚀</span>
-                <h1 class="text-xl font-bold text-indigo-600 uppercase tracking-tight">Aventura do Saber</h1>
-            </div>
-            <div id="stats" class="hidden flex items-center gap-4">
-                <div class="bg-yellow-100 px-4 py-1 rounded-full border border-yellow-200 text-yellow-700 font-bold">
-                    ⭐ <span id="star-count">0</span>
-                </div>
-            </div>
-        </header>
+    <!-- REPRODUTOR DE ÁUDIO NATIVO (O segredo para funcionar no iOS/Android) -->
+    <!-- Este elemento é desbloqueado no primeiro toque do utilizador -->
+    <audio id="global-tts-player" playsinline></audio>
 
-        <!-- Container de Telas -->
-        <main id="main-content">
-            
-            <!-- Tela Inicial -->
-            <section id="screen-home" class="text-center py-10 space-y-8">
-                <div class="text-9xl animate-bounce">🎒</div>
-                <h2 class="text-4xl md:text-5xl font-bold text-slate-800">Olá, pequeno herói!</h2>
-                <p class="text-xl text-slate-500">Vamos estudar para a prova jogando?</p>
-                <div class="flex flex-col md:flex-row gap-4 justify-center">
-                    <button onclick="showScreen('study')" class="btn-game bg-indigo-600 text-white px-10 py-5 rounded-3xl font-bold text-2xl shadow-xl hover:bg-indigo-700">
-                        📖 Ver Explicações
-                    </button>
-                    <button onclick="startQuiz()" class="btn-game bg-pink-500 text-white px-10 py-5 rounded-3xl font-bold text-2xl shadow-xl hover:bg-pink-600">
-                        🎮 Jogar Simulado
-                    </button>
-                </div>
-            </section>
+    <!-- ECRÃ DE DESBLOQUEIO DE ÁUDIO -->
+    <div id="unlock-screen" class="fixed inset-0 z-[100] bg-indigo-600 flex flex-col items-center justify-center text-white p-6 text-center">
+        <div class="text-8xl mb-6 animate-bounce">🎒</div>
+        <h1 class="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">Aventura do Saber</h1>
+        <p class="text-xl md:text-2xl text-indigo-200 mb-12">Toca no botão para iniciar e ligar o som!</p>
+        <button onclick="initApp()" class="btn-game bg-pink-500 hover:bg-pink-600 text-white px-10 py-5 rounded-full font-bold text-3xl shadow-[0_8px_0_rgb(190,24,93)] w-full max-w-md">
+            ▶️ COMEÇAR
+        </button>
+    </div>
 
-            <!-- Tela de Explicações -->
-            <section id="screen-study" class="hidden space-y-6">
-                <button onclick="showScreen('home')" class="text-indigo-600 font-bold flex items-center gap-2 mb-4 hover:-translate-x-1 transition">
-                    ⬅ Voltar para o início
+    <!-- CABEÇALHO -->
+    <header id="main-header" class="hidden p-4 flex justify-between items-center bg-white shadow-sm z-50">
+        <div class="flex items-center gap-2" onclick="showScreen('home')">
+            <span class="text-3xl">🚀</span>
+            <h1 class="text-xl font-extrabold text-indigo-600 tracking-wide">AVENTURA</h1>
+        </div>
+        <div id="score-badge" class="hidden bg-yellow-100 px-4 py-1.5 rounded-full border-2 border-yellow-300 text-yellow-700 font-bold flex items-center gap-2 text-lg">
+            ⭐ <span id="star-count">0</span>
+        </div>
+    </header>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="flex-grow overflow-y-auto p-4 md:p-8 relative">
+        
+        <!-- Ecrã Inicial -->
+        <section id="screen-home" class="hidden flex-col items-center justify-center min-h-[70vh] text-center space-y-8 animate-in fade-in">
+            <h2 class="text-4xl md:text-5xl font-extrabold text-slate-800 leading-tight">Bem-vindo,<br>Pequeno Herói!</h2>
+            <p class="text-xl text-slate-600">O que vamos fazer hoje?</p>
+            <div class="flex flex-col gap-5 w-full max-w-sm mx-auto">
+                <button onclick="showScreen('study')" class="btn-game bg-indigo-600 text-white p-5 rounded-3xl font-bold text-2xl shadow-[0_6px_0_rgb(67,56,202)] flex items-center justify-center gap-3">
+                    📖 Estudar
                 </button>
-                <div id="study-list" class="grid gap-6"></div>
-            </section>
+                <button onclick="startQuiz()" class="btn-game bg-pink-500 text-white p-5 rounded-3xl font-bold text-2xl shadow-[0_6px_0_rgb(190,24,93)] flex items-center justify-center gap-3">
+                    🎮 Jogar Simulado
+                </button>
+            </div>
+        </section>
 
-            <!-- Tela do Jogo -->
-            <section id="screen-quiz" class="hidden">
-                <div class="bg-white rounded-[40px] shadow-2xl p-6 md:p-10 border-8 border-indigo-50 relative overflow-hidden">
-                    <div id="quiz-feedback" class="hidden absolute inset-0 z-50 bg-white/95 flex flex-col items-center justify-center p-8 text-center">
-                        <div id="fb-icon" class="text-8xl mb-4"></div>
-                        <h3 id="fb-title" class="text-3xl font-bold mb-4"></h3>
-                        <p id="fb-text" class="text-xl text-slate-600 mb-8"></p>
-                        <button onclick="nextQuestion()" class="bg-indigo-600 text-white px-12 py-4 rounded-2xl font-bold text-xl shadow-lg">Continuar</button>
-                    </div>
+        <!-- Ecrã de Estudo -->
+        <section id="screen-study" class="hidden space-y-6 pb-10">
+            <button onclick="showScreen('home')" class="text-indigo-600 font-bold flex items-center gap-2 text-lg bg-indigo-50 px-4 py-2 rounded-full w-max">
+                ⬅ Voltar
+            </button>
+            <div id="study-list" class="grid gap-5">
+                <!-- Injetado via JS -->
+            </div>
+            <div class="pt-6">
+                <button onclick="startQuiz()" class="btn-game bg-green-500 text-white w-full py-5 rounded-3xl font-bold text-2xl shadow-[0_6px_0_rgb(22,163,74)] flex items-center justify-center gap-3">
+                    🎮 Fazer o Teste!
+                </button>
+            </div>
+        </section>
 
-                    <div class="flex justify-between items-center mb-6">
-                        <span id="q-cat" class="bg-indigo-100 text-indigo-600 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest"></span>
-                        <span id="q-progress" class="text-slate-400 font-bold"></span>
-                    </div>
-
-                    <h2 id="q-text" class="text-2xl md:text-3xl font-bold text-slate-800 mb-8"></h2>
-                    
-                    <div id="q-options" class="grid gap-4"></div>
+        <!-- Ecrã do Simulado -->
+        <section id="screen-quiz" class="hidden max-w-2xl mx-auto">
+            <div class="glass-panel rounded-[30px] p-6 border-4 border-indigo-100 relative">
+                
+                <!-- Feedback Pop-up -->
+                <div id="quiz-feedback" class="hidden absolute inset-0 z-50 bg-white/95 rounded-[26px] flex flex-col items-center justify-center p-6 text-center">
+                    <div id="fb-icon" class="text-7xl mb-2"></div>
+                    <h3 id="fb-title" class="text-4xl font-extrabold mb-3"></h3>
+                    <p id="fb-text" class="text-xl text-slate-600 mb-8 leading-snug"></p>
+                    <button onclick="nextQuestion()" class="btn-game bg-indigo-600 text-white w-full py-4 rounded-full font-bold text-2xl shadow-[0_6px_0_rgb(67,56,202)]">
+                        Continuar
+                    </button>
                 </div>
-            </section>
 
-            <!-- Tela Final -->
-            <section id="screen-results" class="hidden text-center py-10 space-y-6">
-                <div class="text-9xl">💎</div>
-                <h2 class="text-5xl font-bold text-slate-800">Missão Cumprida!</h2>
-                <p class="text-2xl text-slate-500">Você conseguiu <span id="final-stars" class="text-indigo-600 font-bold"></span> estrelas!</p>
-                <button onclick="location.reload()" class="bg-indigo-600 text-white px-12 py-5 rounded-3xl font-bold text-xl shadow-xl">Recomeçar Jornada</button>
-            </section>
+                <div class="flex justify-between items-center mb-6">
+                    <span id="q-cat" class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-xl text-sm font-bold uppercase"></span>
+                    <span id="q-progress" class="text-slate-400 font-bold text-lg"></span>
+                </div>
 
-        </main>
-    </div>
+                <h2 id="q-text" class="text-2xl md:text-3xl font-extrabold text-slate-800 mb-8 leading-tight"></h2>
+                
+                <div id="q-options" class="flex flex-col gap-3">
+                    <!-- Injetado via JS -->
+                </div>
+            </div>
+        </section>
 
-    <!-- Alerta Customizado (Caso áudio falhe) -->
-    <div id="custom-alert" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl z-[100] message-box">
-        <span id="alert-text"></span>
-    </div>
+        <!-- Ecrã de Resultados -->
+        <section id="screen-results" class="hidden flex-col items-center justify-center min-h-[70vh] text-center space-y-6">
+            <div class="text-8xl">🏆</div>
+            <h2 class="text-4xl font-extrabold text-slate-800">Parabéns!</h2>
+            <div class="bg-white px-8 py-6 rounded-3xl shadow-sm border-2 border-slate-100 w-full max-w-sm mx-auto">
+                <p class="text-xl text-slate-500 mb-2">A tua pontuação final:</p>
+                <p class="text-5xl font-extrabold text-indigo-600 mb-4 flex justify-center items-center gap-2"><span id="final-stars"></span> ⭐</p>
+            </div>
+            <button onclick="location.reload()" class="btn-game bg-green-500 text-white w-full max-w-sm py-5 rounded-full font-bold text-2xl shadow-[0_6px_0_rgb(22,163,74)] mt-4">
+                Jogar Novamente
+            </button>
+        </section>
+
+    </main>
+
+    <!-- Alertas -->
+    <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full font-bold shadow-xl z-[200] transition-transform duration-300 scale-0 origin-center text-center w-max max-w-[90vw]"></div>
 
     <script>
-        const apiKey = ""; // Deixe vazio para o sistema preencher
+        const apiKey = ""; // API Key fornecida pelo ambiente
+        
+        let audioCtx = null; // Para efeitos sonoros (Beeps)
+        let isSpeaking = false;
+        const ttsPlayer = document.getElementById('global-tts-player');
+        let currentAudioButton = null;
+        let originalButtonHTML = "";
+
+        // Estado do Jogo
         let stars = 0;
         let currentIdx = 0;
         let quizItems = [];
-        let audioBusy = false;
 
-        const contents = [
+        const studyData = [
             {
-                title: "Notícia Jornalística 🗞️",
-                text: "A notícia conta fatos que aconteceram de verdade. Ela tem a Manchete (título chamativo) e o Lide (o resumo no primeiro parágrafo que diz: Quem? O quê? Onde? Quando?).",
-                audio: "A notícia serve para informar sobre coisas reais. O título se chama manchete e o primeiro parágrafo se chama lide. É um texto informativo!"
+                title: "O que é uma Notícia? 📰",
+                text: "A notícia conta coisas reais. Tem a Manchete (título grande) e o Lide (o início que conta Quem, O quê, Onde e Quando).",
+                prompt: "A notícia conta coisas reais que aconteceram de verdade. Tem a Manchete, que é o título grande para chamar a atenção, e o Lide, que é o primeiro parágrafo que conta quem, o quê, onde e quando."
             },
             {
                 title: "Nomes Próprios e Comuns 🏷️",
-                text: "Substantivos comuns são nomes de coisas em geral (bola, cachorro). Substantivos próprios são nomes de pessoas, cidades e países (Maria, Brasil). Nomes próprios sempre começam com LETRA MAIÚSCULA!",
-                audio: "Não esqueça: nomes de pessoas, cidades e países são substantivos próprios e precisam de letra maiúscula no começo!"
+                text: "Substantivo Comum: cão, cidade (letra pequena). Substantivo Próprio: Totó, Portugal, Maria (SEMPRE com Letra Maiúscula!).",
+                prompt: "Os nomes comuns, como cão ou cidade, escrevem-se com letra pequena. Os nomes próprios, que são os nomes das pessoas, cidades e países, como Maria ou Portugal, escrevem-se sempre com a primeira letra grande!"
             },
             {
-                title: "Adjetivos: Características 🎨",
-                text: "Adjetivos são palavras que dizem como as coisas são. Exemplos: O céu AZUL, a maçã DOCE, o menino CORAJOSO. Azul, doce e corajoso são adjetivos!",
-                audio: "Os adjetivos dão qualidades aos nomes. Por exemplo, se eu digo que o carro é veloz, veloz é o adjetivo!"
+                title: "Adjetivos: Qualidades 🎨",
+                text: "Adjetivos dizem como as coisas são. O céu é AZUL. A maçã é DOCE. Azul e Doce são adjetivos!",
+                prompt: "Os adjetivos são palavras mágicas que dizem como as coisas são. Por exemplo: O céu é azul. A maçã é doce. As palavras azul e doce são adjetivos, pois dão qualidade às coisas."
             },
             {
-                cat: "História",
                 title: "Respeito e Igualdade 🤝",
-                text: "Combater a discriminação racial é respeitar todas as pessoas, não importa a cor da pele ou a origem. Todos somos iguais e merecemos o mesmo respeito e carinho.",
-                audio: "O respeito é fundamental! Combater o racismo significa valorizar todas as culturas e tratar todos com igualdade e amor."
+                text: "Combater a discriminação é respeitar todos os amigos, não importa a cor da pele. Somos todos iguais por dentro!",
+                prompt: "Combater a discriminação é muito importante. Significa respeitar todos os teus amigos, não importando a cor da pele ou a origem. Somos todos iguais e muito especiais!"
             }
         ];
 
-        // --- SISTEMA DE ÁUDIO CORRIGIDO ---
-        async function playAudio(text, btn) {
-            if (audioBusy) return;
-            audioBusy = true;
-            const originalContent = btn.innerHTML;
-            btn.innerHTML = `<div class="loading-ring"></div>`;
+        // --- SISTEMA DE ÁUDIO CORRIGIDO PARA MOBILE ---
+        
+        function initApp() {
+            // 1. Iniciar o contexto de áudio para os Efeitos Sonoros (SFX)
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContext();
+            
+            // Tocar um bipe mudo para desbloquear o Web Audio API
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            gain.gain.value = 0;
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(0);
+            osc.stop(0.01);
+
+            // 2. Desbloquear o elemento HTML <audio> para as vozes (TTS)
+            // Carregamos um áudio silencioso invisível de 1 segundo para garantir a permissão do iOS.
+            ttsPlayer.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+            ttsPlayer.load();
+            ttsPlayer.play().then(() => {
+                ttsPlayer.pause(); // Pausa imediatamente após obter permissão
+            }).catch(e => console.log("Unlock player ignorado.", e));
+
+            // Mudar Ecrã
+            document.getElementById('unlock-screen').classList.add('hidden');
+            document.getElementById('main-header').classList.remove('hidden');
+            showScreen('home');
+        }
+
+        async function playTTS(text, btnElement) {
+            // Se já estiver a falar, o clique serve para PARAR
+            if (isSpeaking) {
+                ttsPlayer.pause();
+                ttsPlayer.currentTime = 0;
+                isSpeaking = false;
+                if(currentAudioButton) currentAudioButton.innerHTML = originalButtonHTML;
+                return;
+            }
+
+            // Preparar Interface (Mostrar spinner)
+            isSpeaking = true;
+            currentAudioButton = btnElement;
+            originalButtonHTML = btnElement.innerHTML;
+            btnElement.innerHTML = `<div class="spinner"></div>`;
+
+            // Configurar um limite de tempo (timeout de 12 segundos) para não congelar se a net falhar
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 12000);
 
             try {
+                // Pedir o áudio à IA Gemini
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: `Diga com voz de professor amigável para uma criança pequena: ${text}` }] }],
-                        generationConfig: {
-                            responseModalities: ["AUDIO"],
-                            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } }
-                        }
-                    })
+                        contents: [{ parts: [{ text: text }] }],
+                        generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } } },
+                        model: "gemini-2.5-flash-preview-tts"
+                    }),
+                    signal: controller.signal
                 });
 
-                if (!response.ok) throw new Error("Erro na rede");
+                clearTimeout(timeoutId);
+
+                if (!response.ok) throw new Error("Erro de comunicação.");
 
                 const result = await response.json();
-                const pcmData = result.candidates[0].content.parts[0].inlineData.data;
-                const mimeType = result.candidates[0].content.parts[0].inlineData.mimeType;
-                const sampleRate = parseInt(mimeType.split('rate=')[1]) || 24000;
-
-                const wavUrl = pcmToWavUrl(pcmData, sampleRate);
-                const audio = new Audio(wavUrl);
+                const pcmBase64 = result.candidates[0].content.parts[0].inlineData.data;
+                const mimeType = result.candidates[0].content.parts[0].inlineData.mimeType || "";
                 
-                audio.play().catch(e => {
-                    showMsg("Clique na tela para habilitar o som!");
-                });
+                let sampleRate = 24000;
+                if (mimeType.includes("rate=")) sampleRate = parseInt(mimeType.split("rate=")[1]) || 24000;
 
-                audio.onended = () => {
-                    btn.innerHTML = originalContent;
-                    audioBusy = false;
+                // Converter PCM para URL de Ficheiro WAV
+                const wavUrl = pcmToWavUrl(pcmBase64, sampleRate);
+
+                // Tocar no Reprodutor Nativo (Já desbloqueado no initApp)
+                ttsPlayer.src = wavUrl;
+                
+                await ttsPlayer.play(); // O iOS permite porque o botão 'Começar' desbloqueou isto antes!
+                
+                btnElement.innerHTML = `⏸️ Parar Áudio`;
+
+                ttsPlayer.onended = () => {
+                    isSpeaking = false;
+                    btnElement.innerHTML = originalButtonHTML;
                 };
-            } catch (err) {
-                console.error(err);
-                showMsg("O áudio não pôde ser carregado. Verifique sua conexão.");
-                btn.innerHTML = originalContent;
-                audioBusy = false;
+
+            } catch (error) {
+                console.error(error);
+                clearTimeout(timeoutId);
+                showToast(error.name === 'AbortError' ? "A internet está lenta." : "Falha ao carregar áudio.");
+                isSpeaking = false;
+                btnElement.innerHTML = originalButtonHTML;
             }
         }
 
+        // Função segura e rápida de conversão de som para o navegador
         function pcmToWavUrl(base64Pcm, sampleRate) {
-            const pcmBuffer = Uint8Array.from(atob(base64Pcm), c => c.charCodeAt(0)).buffer;
+            const binaryStr = atob(base64Pcm);
+            const len = binaryStr.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) bytes[i] = binaryStr.charCodeAt(i);
+            
+            const buffer = bytes.buffer;
             const wavHeader = new ArrayBuffer(44);
             const view = new DataView(wavHeader);
-            const writeStr = (off, s) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
-            
+
+            const writeStr = (offset, string) => {
+                for (let i = 0; i < string.length; i++) view.setUint8(offset + i, string.charCodeAt(i));
+            };
+
             writeStr(0, 'RIFF');
-            view.setUint32(4, 36 + pcmBuffer.byteLength, true);
+            view.setUint32(4, 36 + len, true);
             writeStr(8, 'WAVE');
             writeStr(12, 'fmt ');
             view.setUint32(16, 16, true);
-            view.setUint16(20, 1, true);
-            view.setUint16(22, 1, true);
+            view.setUint16(20, 1, true); 
+            view.setUint16(22, 1, true); 
             view.setUint32(24, sampleRate, true);
-            view.setUint32(28, sampleRate * 2, true);
-            view.setUint16(32, 2, true);
-            view.setUint16(34, 16, true);
+            view.setUint32(28, sampleRate * 2, true); 
+            view.setUint16(32, 2, true); 
+            view.setUint16(34, 16, true); 
             writeStr(36, 'data');
-            view.setUint32(40, pcmBuffer.byteLength, true);
+            view.setUint32(40, len, true);
 
-            const blob = new Blob([wavHeader, pcmBuffer], { type: 'audio/wav' });
+            const blob = new Blob([wavHeader, buffer], { type: 'audio/wav' });
             return URL.createObjectURL(blob);
         }
 
-        // --- LÓGICA DO JOGO ---
+        // Efeitos sonoros para o jogo (Beeps rápidos)
+        function playSFX(type) {
+            if (!audioCtx || audioCtx.state === 'suspended') return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            if (type === 'correct') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+            } else {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+            }
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.transform = 'translate(-50%, 0) scale(1)';
+            setTimeout(() => { t.style.transform = 'translate(-50%, 0) scale(0)'; }, 3500);
+        }
+
+        // --- NAVEGAÇÃO E LÓGICA DO JOGO ---
+
         function showScreen(id) {
-            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            if (isSpeaking) {
+                ttsPlayer.pause();
+                isSpeaking = false;
+                if(currentAudioButton) currentAudioButton.innerHTML = originalButtonHTML;
+            }
+
+            document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
             document.getElementById(`screen-${id}`).classList.remove('hidden');
-            if (id === 'home') document.getElementById('stats').classList.add('hidden');
-            else document.getElementById('stats').classList.remove('hidden');
+            
+            const badge = document.getElementById('score-badge');
+            if (id === 'quiz' || id === 'results') badge.classList.remove('hidden');
+            else badge.classList.add('hidden');
+
             if (id === 'study') renderStudy();
+            window.scrollTo(0,0);
         }
 
         function renderStudy() {
             const list = document.getElementById('study-list');
-            list.innerHTML = contents.map(c => `
-                <div class="bg-white p-6 rounded-[30px] shadow-sm border-2 border-slate-100 flex flex-col md:flex-row gap-4 items-start">
-                    <div class="flex-grow">
-                        <div class="flex justify-between items-center mb-2">
-                            <h3 class="text-2xl font-bold text-indigo-600">${c.title}</h3>
-                            <button onclick="playAudio('${c.audio.replace(/'/g, "\\'")}', this)" class="bg-indigo-50 text-indigo-600 p-3 rounded-full hover:bg-indigo-100 transition shadow-sm">
-                                🔊 Ouvir
-                            </button>
-                        </div>
-                        <p class="text-slate-600 text-lg">${c.text}</p>
-                    </div>
+            list.innerHTML = studyData.map(item => `
+                <div class="bg-white rounded-[24px] p-5 shadow-sm border-2 border-indigo-50">
+                    <h3 class="text-2xl font-extrabold text-indigo-600 mb-3">${item.title}</h3>
+                    <p class="text-lg text-slate-600 mb-4 leading-relaxed">${item.text}</p>
+                    <button onclick="playTTS('${item.prompt.replace(/'/g, "\\'")}', this)" class="btn-game bg-indigo-100 text-indigo-700 w-full py-3 rounded-full font-bold text-lg flex justify-center items-center h-14">
+                        🔊 Ouvir Explicação
+                    </button>
                 </div>
             `).join('');
         }
 
         function startQuiz() {
-            // Gerar 80 questões (simuladas por repetição dos templates para o exemplo)
-            const templates = [
-                { q: "Qual o nome do título de uma notícia?", cat: "Português", opts: ["Manchete", "Lide", "Rodapé", "Dicionário"], ans: 0, exp: "A manchete é o título que chama atenção!" },
-                { q: "Qual palavra precisa de letra MAIÚSCULA?", cat: "Gramática", opts: ["mesa", "brasil", "sapato", "escola"], ans: 1, exp: "Brasil é nome de país, por isso é Próprio!" },
-                { q: "Qual destes é um adjetivo?", cat: "Gramática", opts: ["carro", "menina", "inteligente", "casa"], ans: 2, exp: "Inteligente é uma característica." },
-                { q: "O primeiro parágrafo da notícia se chama:", cat: "Português", opts: ["Lide", "Fim", "Capa", "Desenho"], ans: 0, exp: "O lide conta o que aconteceu logo no início." },
-                { q: "Tratar mal um amigo pela cor da pele é:", cat: "História", opts: ["Certo", "Legal", "Discriminação", "Engraçado"], ans: 2, exp: "Isso é errado e injusto." }
+            const questionBank = [
+                { q: "Como se chama o título da notícia?", cat: "Português", opts: ["Lide", "Manchete", "Nome", "Capa"], ans: 1, exp: "Manchete é o nome do título grande e chamativo." },
+                { q: "As notícias contam histórias...", cat: "Português", opts: ["De princesas", "Inventadas", "Reais", "Engraçadas"], ans: 2, exp: "A notícia serve para nos informar sobre factos reais que aconteceram de verdade." },
+                { q: "Onde encontramos o resumo da notícia?", cat: "Português", opts: ["No fim", "Na capa", "No Lide", "Nas fotos"], ans: 2, exp: "O Lide é o primeiro parágrafo e tem o resumo." },
+                { q: "Qual palavra é um Nome Próprio?", cat: "Gramática", opts: ["escola", "brasil", "menino", "mesa"], ans: 1, exp: "Brasil é o nome de um país, por isso é Próprio." },
+                { q: "Qual palavra é um Nome Comum?", cat: "Gramática", opts: ["gato", "Portugal", "João", "Lisboa"], ans: 0, exp: "Existem muitos gatos, por isso é um nome comum." },
+                { q: "Nomes próprios escrevem-se com:", cat: "Gramática", opts: ["Letra pequena", "Letra Maiúscula", "Apenas números", "De pernas para o ar"], ans: 1, exp: "Os nomes próprios são únicos e precisam de Letra Maiúscula." },
+                { q: "Qual o adjetivo na frase: 'O gato é bonito'?", cat: "Gramática", opts: ["O", "gato", "é", "bonito"], ans: 3, exp: "Bonito é a característica do gato." },
+                { q: "Escolhe um adjetivo para o SOL:", cat: "Gramática", opts: ["Quente", "Andar", "Cadeira", "Azul"], ans: 0, exp: "Quente é como o Sol é!" },
+                { q: "Devemos tratar as pessoas diferentes com:", cat: "História", opts: ["Risos", "Gritos", "Respeito", "Tristeza"], ans: 2, exp: "O respeito é a base de tudo para combater a discriminação." },
+                { q: "Tratar mal um colega devido à sua cor é:", cat: "História", opts: ["Correto", "Divertido", "Discriminação", "Estudo"], ans: 2, exp: "Isso é discriminação, é errado e não se deve fazer." }
             ];
-            
+
             quizItems = [];
-            for(let i=0; i<80; i++) {
-                quizItems.push({...templates[i % templates.length], id: i});
+            for(let i = 0; i < 80; i++) {
+                quizItems.push({...questionBank[Math.floor(Math.random() * questionBank.length)], id: i});
             }
-            
-            currentIdx = 0;
+
             stars = 0;
-            updateUI();
+            currentIdx = 0;
+            updateScore();
             showScreen('quiz');
             renderQuestion();
         }
@@ -248,13 +383,13 @@
             const q = quizItems[currentIdx];
             document.getElementById('quiz-feedback').classList.add('hidden');
             document.getElementById('q-cat').innerText = q.cat;
-            document.getElementById('q-progress').innerText = `${currentIdx + 1} / 80`;
+            document.getElementById('q-progress').innerText = `${currentIdx + 1}/80`;
             document.getElementById('q-text').innerText = q.q;
 
-            const opts = document.getElementById('q-options');
-            opts.innerHTML = q.opts.map((o, i) => `
-                <button onclick="handleAnswer(${i})" class="w-full text-left p-5 rounded-2xl border-4 border-slate-100 hover:border-indigo-400 hover:bg-indigo-50 transition-all font-bold text-lg text-slate-700">
-                    ${String.fromCharCode(65 + i)}) ${o}
+            document.getElementById('q-options').innerHTML = q.opts.map((opt, i) => `
+                <button onclick="handleAnswer(${i})" class="btn-game w-full text-left bg-white p-5 rounded-2xl border-2 border-slate-200 text-xl font-bold text-slate-700 flex items-center gap-4 active:bg-indigo-50 active:border-indigo-400">
+                    <div class="bg-indigo-100 text-indigo-600 w-10 h-10 rounded-full flex items-center justify-center shrink-0">${['A', 'B', 'C', 'D'][i]}</div>
+                    ${opt}
                 </button>
             `).join('');
         }
@@ -262,47 +397,42 @@
         function handleAnswer(idx) {
             const q = quizItems[currentIdx];
             const isCorrect = idx === q.ans;
-            
             const fb = document.getElementById('quiz-feedback');
-            fb.classList.remove('hidden');
             
-            if (isCorrect) {
+            fb.classList.remove('hidden');
+
+            if(isCorrect) {
                 stars += 10;
+                playSFX('correct');
                 document.getElementById('fb-icon').innerText = "⭐";
-                document.getElementById('fb-title').innerText = "Incrível!";
-                document.getElementById('fb-title').className = "text-3xl font-bold text-green-500 mb-4";
-                document.getElementById('fb-text').innerText = "Você acertou e ganhou estrelas!";
+                document.getElementById('fb-title').innerText = "Acertaste!";
+                document.getElementById('fb-title').className = "text-4xl font-extrabold text-green-500 mb-3";
+                document.getElementById('fb-text').innerText = "Ganhaste 10 estrelas!";
             } else {
+                playSFX('wrong');
                 document.getElementById('fb-icon').innerText = "💡";
-                document.getElementById('fb-title').innerText = "Ops!";
-                document.getElementById('fb-title').className = "text-3xl font-bold text-amber-500 mb-4";
+                document.getElementById('fb-title').innerText = "Quase...";
+                document.getElementById('fb-title').className = "text-4xl font-extrabold text-amber-500 mb-3";
                 document.getElementById('fb-text').innerText = q.exp;
             }
-            updateUI();
+            updateScore();
         }
 
         function nextQuestion() {
-            if (currentIdx < 79) {
+            if(currentIdx < 79) {
                 currentIdx++;
                 renderQuestion();
             } else {
-                showScreen('results');
                 document.getElementById('final-stars').innerText = stars;
+                showScreen('results');
+                playSFX('correct'); 
             }
         }
 
-        function updateUI() {
+        function updateScore() {
             document.getElementById('star-count').innerText = stars;
         }
 
-        function showMsg(text) {
-            const el = document.getElementById('custom-alert');
-            document.getElementById('alert-text').innerText = text;
-            el.classList.remove('hidden');
-            setTimeout(() => el.classList.add('hidden'), 3000);
-        }
-
-        window.onload = () => showScreen('home');
     </script>
 </body>
 </html>
