@@ -3,210 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aventura do Saber - Jogo de Estudo</title>
+    <title>Aventura do Saber - Jogo Educativo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Fredoka', sans-serif; background-color: #e0f2fe; overflow-x: hidden; }
-        .btn-bounce:active { transform: scale(0.95); }
-        .card-anim { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .card-anim:hover { transform: translateY(-10px); }
-        .progress-bar { transition: width 0.5s ease-in-out; }
-        .floating { animation: floating 3s ease-in-out infinite; }
-        @keyframes floating {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
-        .confetti { position: absolute; pointer-events: none; }
-        .gradient-text { background: linear-gradient(to right, #4f46e5, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        body { font-family: 'Fredoka', sans-serif; background-color: #f0f9ff; }
+        .btn-game { transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .btn-game:active { transform: scale(0.95); }
+        .loading-ring { border: 4px solid #f3f3f3; border-top: 4px solid #6366f1; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .message-box { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
-<body class="text-slate-800">
+<body class="text-slate-800 pb-10">
 
-    <div id="app" class="min-h-screen flex flex-col">
-        <!-- Barra Superior -->
-        <nav class="bg-white shadow-md p-4 flex justify-between items-center sticky top-0 z-50">
-            <div class="flex items-center gap-2 cursor-pointer" onclick="showScreen('home')">
+    <div id="app" class="max-w-4xl mx-auto px-4 pt-6">
+        <!-- Cabeçalho -->
+        <header class="flex justify-between items-center mb-8 bg-white p-4 rounded-3xl shadow-sm border-2 border-indigo-100">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="showScreen('home')">
                 <span class="text-3xl">🚀</span>
-                <h1 class="text-xl font-bold gradient-text uppercase tracking-wider">Aventura do Saber</h1>
+                <h1 class="text-xl font-bold text-indigo-600 uppercase tracking-tight">Aventura do Saber</h1>
             </div>
-            <div id="status-bar" class="hidden flex items-center gap-4">
-                <div class="flex items-center gap-1 bg-yellow-100 px-3 py-1 rounded-full border border-yellow-200">
-                    <span class="text-lg">⭐</span>
-                    <span id="star-count" class="font-bold text-yellow-700">0</span>
-                </div>
-                <div class="hidden md:block w-32 h-3 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
-                    <div id="global-progress" class="h-full bg-green-400 progress-bar" style="width: 0%"></div>
+            <div id="stats" class="hidden flex items-center gap-4">
+                <div class="bg-yellow-100 px-4 py-1 rounded-full border border-yellow-200 text-yellow-700 font-bold">
+                    ⭐ <span id="star-count">0</span>
                 </div>
             </div>
-        </nav>
+        </header>
 
-        <main class="flex-grow p-4 md:p-8 flex items-center justify-center">
+        <!-- Container de Telas -->
+        <main id="main-content">
             
-            <!-- TELA INICIAL -->
-            <section id="screen-home" class="text-center space-y-8 animate-in fade-in duration-700">
-                <div class="floating">
-                    <img src="https://img.icons8.com/clouds/200/rocket.png" alt="Foguete" class="mx-auto">
-                </div>
-                <h2 class="text-4xl md:text-5xl font-bold text-indigo-900 leading-tight">Olá, pequeno explorador!<br><span class="text-pink-500">Pronto para aprender?</span></h2>
-                <p class="text-slate-600 text-xl max-w-lg mx-auto">Vamos estudar para a sua prova de um jeito super divertido!</p>
-                <div class="flex flex-col md:flex-row gap-4 justify-center pt-6">
-                    <button onclick="showScreen('study')" class="btn-bounce bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-5 rounded-3xl font-bold text-2xl shadow-xl shadow-indigo-200 transition-all flex items-center justify-center gap-3">
-                        <span>📖</span> Estudar Conteúdo
+            <!-- Tela Inicial -->
+            <section id="screen-home" class="text-center py-10 space-y-8">
+                <div class="text-9xl animate-bounce">🎒</div>
+                <h2 class="text-4xl md:text-5xl font-bold text-slate-800">Olá, pequeno herói!</h2>
+                <p class="text-xl text-slate-500">Vamos estudar para a prova jogando?</p>
+                <div class="flex flex-col md:flex-row gap-4 justify-center">
+                    <button onclick="showScreen('study')" class="btn-game bg-indigo-600 text-white px-10 py-5 rounded-3xl font-bold text-2xl shadow-xl hover:bg-indigo-700">
+                        📖 Ver Explicações
                     </button>
-                    <button onclick="startGame()" class="btn-bounce bg-pink-500 hover:bg-pink-600 text-white px-8 py-5 rounded-3xl font-bold text-2xl shadow-xl shadow-pink-200 transition-all flex items-center justify-center gap-3">
-                        <span>🎮</span> Começar o Jogo
+                    <button onclick="startQuiz()" class="btn-game bg-pink-500 text-white px-10 py-5 rounded-3xl font-bold text-2xl shadow-xl hover:bg-pink-600">
+                        🎮 Jogar Simulado
                     </button>
                 </div>
             </section>
 
-            <!-- TELA DE ESTUDO (REVISÃO) -->
-            <section id="screen-study" class="hidden w-full max-w-4xl space-y-6">
-                <div class="flex items-center justify-between mb-4">
-                    <button onclick="showScreen('home')" class="text-indigo-600 font-bold flex items-center gap-2 hover:translate-x-[-5px] transition">
-                        ← Voltar ao Início
-                    </button>
-                </div>
-
-                <div class="grid gap-6" id="study-list">
-                    <!-- Cards de estudo injetados via JS -->
-                </div>
-
-                <div class="text-center pt-8">
-                    <button onclick="startGame()" class="bg-green-500 text-white px-12 py-4 rounded-3xl font-bold text-xl shadow-lg hover:bg-green-600 transition">
-                        Já aprendi tudo! Vamos jogar? 🎯
-                    </button>
-                </div>
-            </section>
-
-            <!-- TELA DO JOGO (SIMULADO) -->
-            <section id="screen-game" class="hidden w-full max-w-2xl bg-white rounded-[40px] shadow-2xl p-8 border-8 border-indigo-50 relative overflow-hidden">
-                <!-- Feedback Overlay (Acerto/Erro) -->
-                <div id="feedback-overlay" class="hidden absolute inset-0 z-40 flex items-center justify-center p-8 bg-white/95">
-                    <div class="text-center space-y-6">
-                        <div id="feedback-icon" class="text-8xl"></div>
-                        <h3 id="feedback-title" class="text-3xl font-bold"></h3>
-                        <p id="feedback-msg" class="text-slate-600 text-xl"></p>
-                        <button onclick="nextQuestion()" class="bg-indigo-600 text-white px-10 py-4 rounded-2xl font-bold text-xl shadow-lg hover:bg-indigo-700">
-                            Continuar Aventura!
-                        </button>
-                    </div>
-                </div>
-
-                <div class="flex justify-between items-center mb-6">
-                    <span id="question-category" class="bg-pink-100 text-pink-600 px-4 py-1 rounded-full text-sm font-bold uppercase tracking-widest"></span>
-                    <span id="question-count" class="font-bold text-slate-400">Questão 1/80</span>
-                </div>
-
-                <div id="question-text" class="text-2xl md:text-3xl font-bold text-slate-800 mb-8 leading-tight"></div>
-
-                <div id="options-grid" class="grid gap-4">
-                    <!-- Opções injetadas via JS -->
-                </div>
-            </section>
-
-            <!-- TELA DE RESULTADOS -->
-            <section id="screen-results" class="hidden text-center space-y-8 animate-in zoom-in duration-500">
-                <div class="text-9xl">🏆</div>
-                <h2 class="text-5xl font-bold text-indigo-900">Uau! Você completou!</h2>
-                <div class="bg-white p-8 rounded-[40px] shadow-xl max-w-md mx-auto space-y-4">
-                    <p class="text-2xl">Você ganhou <span id="final-stars" class="font-bold text-yellow-500"></span> estrelas!</p>
-                    <div id="medal-container" class="text-6xl flex justify-center gap-2"></div>
-                </div>
-                <button onclick="location.reload()" class="bg-indigo-600 text-white px-12 py-4 rounded-3xl font-bold text-xl shadow-lg hover:bg-indigo-700 transition">
-                    Jogar Novamente 🔄
+            <!-- Tela de Explicações -->
+            <section id="screen-study" class="hidden space-y-6">
+                <button onclick="showScreen('home')" class="text-indigo-600 font-bold flex items-center gap-2 mb-4 hover:-translate-x-1 transition">
+                    ⬅ Voltar para o início
                 </button>
+                <div id="study-list" class="grid gap-6"></div>
+            </section>
+
+            <!-- Tela do Jogo -->
+            <section id="screen-quiz" class="hidden">
+                <div class="bg-white rounded-[40px] shadow-2xl p-6 md:p-10 border-8 border-indigo-50 relative overflow-hidden">
+                    <div id="quiz-feedback" class="hidden absolute inset-0 z-50 bg-white/95 flex flex-col items-center justify-center p-8 text-center">
+                        <div id="fb-icon" class="text-8xl mb-4"></div>
+                        <h3 id="fb-title" class="text-3xl font-bold mb-4"></h3>
+                        <p id="fb-text" class="text-xl text-slate-600 mb-8"></p>
+                        <button onclick="nextQuestion()" class="bg-indigo-600 text-white px-12 py-4 rounded-2xl font-bold text-xl shadow-lg">Continuar</button>
+                    </div>
+
+                    <div class="flex justify-between items-center mb-6">
+                        <span id="q-cat" class="bg-indigo-100 text-indigo-600 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest"></span>
+                        <span id="q-progress" class="text-slate-400 font-bold"></span>
+                    </div>
+
+                    <h2 id="q-text" class="text-2xl md:text-3xl font-bold text-slate-800 mb-8"></h2>
+                    
+                    <div id="q-options" class="grid gap-4"></div>
+                </div>
+            </section>
+
+            <!-- Tela Final -->
+            <section id="screen-results" class="hidden text-center py-10 space-y-6">
+                <div class="text-9xl">💎</div>
+                <h2 class="text-5xl font-bold text-slate-800">Missão Cumprida!</h2>
+                <p class="text-2xl text-slate-500">Você conseguiu <span id="final-stars" class="text-indigo-600 font-bold"></span> estrelas!</p>
+                <button onclick="location.reload()" class="bg-indigo-600 text-white px-12 py-5 rounded-3xl font-bold text-xl shadow-xl">Recomeçar Jornada</button>
             </section>
 
         </main>
     </div>
 
-    <!-- AUDIO PLAYER HIDDEN -->
-    <audio id="global-audio" class="hidden"></audio>
+    <!-- Alerta Customizado (Caso áudio falhe) -->
+    <div id="custom-alert" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl z-[100] message-box">
+        <span id="alert-text"></span>
+    </div>
 
     <script>
-        const apiKey = ""; // Ambiente provisionado
+        const apiKey = ""; // Deixe vazio para o sistema preencher
         let stars = 0;
-        let currentQuestion = 0;
-        let quizData = [];
-        let isAudioPlaying = false;
+        let currentIdx = 0;
+        let quizItems = [];
+        let audioBusy = false;
 
-        const studyData = [
+        const contents = [
             {
-                id: 'noticia',
-                title: "O que é uma Notícia? 📰",
-                icon: "🗞️",
-                color: "bg-blue-500",
-                text: "A notícia conta coisas reais que aconteceram hoje ou ontem. Ela tem um título grande chamado Manchete para chamar sua atenção. No começo, ela já responde: Quem fez? O que aconteceu? Onde foi? É como contar um fato importante para os amigos!",
-                audioText: "A notícia é um texto que conta fatos reais do dia a dia. Ela tem a manchete, que é o título chamativo, e o lide, que resume tudo o que aconteceu. Lembre-se: notícia não é inventada!"
+                title: "Notícia Jornalística 🗞️",
+                text: "A notícia conta fatos que aconteceram de verdade. Ela tem a Manchete (título chamativo) e o Lide (o resumo no primeiro parágrafo que diz: Quem? O quê? Onde? Quando?).",
+                audio: "A notícia serve para informar sobre coisas reais. O título se chama manchete e o primeiro parágrafo se chama lide. É um texto informativo!"
             },
             {
-                id: 'nomes',
                 title: "Nomes Próprios e Comuns 🏷️",
-                icon: "📛",
-                color: "bg-green-500",
-                text: "Substantivo é o nome das coisas. Comum é o nome de qualquer um: cachorro, cidade, caneta. Próprio é o nome especial: Totó, São Paulo, Maria. Nomes próprios são muito importantes, por isso começam sempre com a LETRA MAIÚSCULA!",
-                audioText: "Substantivos dão nome a tudo! O substantivo comum é geral, como 'menino'. O próprio é específico, como 'Pedro'. Nomes próprios sempre começam com letra maiúscula, não esqueça!"
+                text: "Substantivos comuns são nomes de coisas em geral (bola, cachorro). Substantivos próprios são nomes de pessoas, cidades e países (Maria, Brasil). Nomes próprios sempre começam com LETRA MAIÚSCULA!",
+                audio: "Não esqueça: nomes de pessoas, cidades e países são substantivos próprios e precisam de letra maiúscula no começo!"
             },
             {
-                id: 'adjetivos',
-                title: "Adjetivos: As Qualidades 🎨",
-                icon: "🌟",
-                color: "bg-purple-500",
-                text: "Os adjetivos dão cor e vida às palavras! Eles dizem como as coisas são. O sorvete é GELADO. A flor é CHEIROSA. O herói é CORAJOSO. Toda vez que você dá uma característica para algo, você está usando um adjetivo!",
-                audioText: "Adjetivos são palavras que dão características aos nomes. Por exemplo: maçã vermelha, cachorro brincalhão. Vermelha e brincalhão são os adjetivos!"
+                title: "Adjetivos: Características 🎨",
+                text: "Adjetivos são palavras que dizem como as coisas são. Exemplos: O céu AZUL, a maçã DOCE, o menino CORAJOSO. Azul, doce e corajoso são adjetivos!",
+                audio: "Os adjetivos dão qualidades aos nomes. Por exemplo, se eu digo que o carro é veloz, veloz é o adjetivo!"
             },
             {
-                id: 'respeito',
+                cat: "História",
                 title: "Respeito e Igualdade 🤝",
-                icon: "🌍",
-                color: "bg-amber-500",
-                text: "Combater a discriminação racial é tratar todo mundo com amor e respeito, não importa a cor da pele ou de onde a pessoa veio. Somos todos iguais por dentro e a nossa diversidade é o que faz o mundo ser bonito!",
-                audioText: "O combate à discriminação racial é sobre respeitar todas as pessoas, independentemente da cor da pele. O respeito é a regra mais importante para vivermos bem juntos!"
+                text: "Combater a discriminação racial é respeitar todas as pessoas, não importa a cor da pele ou a origem. Todos somos iguais e merecemos o mesmo respeito e carinho.",
+                audio: "O respeito é fundamental! Combater o racismo significa valorizar todas as culturas e tratar todos com igualdade e amor."
             }
         ];
 
-        // --- GERADOR DE 80 QUESTÕES ---
-        function generateQuiz() {
-            const baseQuestions = [
-                // PORTUGUÊS - NOTÍCIA
-                { q: "Qual o nome do título de uma notícia?", cat: "Português", opts: ["Manchete", "Rodapé", "Receita", "História"], ans: 0, exp: "A Manchete é o título que brilha no jornal!" },
-                { q: "A notícia conta fatos...", cat: "Português", opts: ["Inventados", "Reais", "Mentirosos", "De mentirinha"], ans: 1, exp: "Notícias sempre falam a verdade!" },
-                { q: "O primeiro parágrafo da notícia se chama:", cat: "Português", opts: ["Lide", "Fim", "Capa", "Desenho"], ans: 0, exp: "O Lide conta o resumo de tudo!" },
-                // GRAMÁTICA - SUBSTANTIVOS
-                { q: "Qual palavra é um nome Próprio?", cat: "Gramática", opts: ["bola", "casa", "Brasil", "gato"], ans: 2, exp: "Brasil é nome de país, por isso é Próprio!" },
-                { q: "Como escrevemos nomes Próprios?", cat: "Gramática", opts: ["Letra Pequena", "Letra Maiúscula", "Com números", "De trás para frente"], ans: 1, exp: "Eles são especiais, merecem letra grande!" },
-                { q: "A palavra 'sapato' é um substantivo:", cat: "Gramática", opts: ["Comum", "Próprio", "Adjetivo", "Verbo"], ans: 0, exp: "Existem muitos sapatos, por isso é comum." },
-                // ADJETIVOS
-                { q: "Qual é o adjetivo na frase: 'O gato é fofinho'?", cat: "Gramática", opts: ["O", "gato", "é", "fofinho"], ans: 3, exp: "Fofinho é como o gato é!" },
-                { q: "Escolha um adjetivo para o SOL:", cat: "Gramática", opts: ["Gelado", "Quente", "Azul", "Quadrado"], ans: 1, exp: "O sol é muito quente!" },
-                // HISTÓRIA
-                { q: "Tratar mal alguém pela cor da pele é:", cat: "História", opts: ["Certo", "Divertido", "Discriminação", "Legal"], ans: 2, exp: "Isso é errado e devemos sempre combater!" },
-                { q: "Devemos tratar todos os amigos com:", cat: "História", opts: ["Respeito", "Grosseria", "Gritos", "Empurrões"], ans: 0, exp: "O respeito faz o mundo melhor!" }
-            ];
-
-            let deck = [];
-            while(deck.length < 80) {
-                const template = baseQuestions[Math.floor(Math.random() * baseQuestions.length)];
-                deck.push({ ...template, id: deck.length });
-            }
-            return deck;
-        }
-
-        // --- MOTOR DE ÁUDIO ---
-        async function playTTS(text, btn) {
-            if(isAudioPlaying) return;
-            const originalIcon = btn.innerHTML;
-            btn.innerHTML = "⏳";
-            isAudioPlaying = true;
+        // --- SISTEMA DE ÁUDIO CORRIGIDO ---
+        async function playAudio(text, btn) {
+            if (audioBusy) return;
+            audioBusy = true;
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = `<div class="loading-ring"></div>`;
 
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: `Diga de forma carinhosa para uma criança de 8 anos: ${text}` }] }],
+                        contents: [{ parts: [{ text: `Diga com voz de professor amigável para uma criança pequena: ${text}` }] }],
                         generationConfig: {
                             responseModalities: ["AUDIO"],
                             speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } }
@@ -214,160 +146,162 @@
                     })
                 });
 
-                const data = await response.json();
-                const pcmData = data.candidates[0].content.parts[0].inlineData.data;
-                const audioUrl = pcmToWavUrl(pcmData, 24000);
+                if (!response.ok) throw new Error("Erro na rede");
+
+                const result = await response.json();
+                const pcmData = result.candidates[0].content.parts[0].inlineData.data;
+                const mimeType = result.candidates[0].content.parts[0].inlineData.mimeType;
+                const sampleRate = parseInt(mimeType.split('rate=')[1]) || 24000;
+
+                const wavUrl = pcmToWavUrl(pcmData, sampleRate);
+                const audio = new Audio(wavUrl);
                 
-                const audio = document.getElementById('global-audio');
-                audio.src = audioUrl;
-                audio.play();
+                audio.play().catch(e => {
+                    showMsg("Clique na tela para habilitar o som!");
+                });
+
                 audio.onended = () => {
-                    btn.innerHTML = originalIcon;
-                    isAudioPlaying = false;
+                    btn.innerHTML = originalContent;
+                    audioBusy = false;
                 };
             } catch (err) {
                 console.error(err);
-                btn.innerHTML = originalIcon;
-                isAudioPlaying = false;
+                showMsg("O áudio não pôde ser carregado. Verifique sua conexão.");
+                btn.innerHTML = originalContent;
+                audioBusy = false;
             }
         }
 
-        function pcmToWavUrl(base64, sampleRate) {
-            const buffer = Uint8Array.from(atob(base64), c => c.charCodeAt(0)).buffer;
+        function pcmToWavUrl(base64Pcm, sampleRate) {
+            const pcmBuffer = Uint8Array.from(atob(base64Pcm), c => c.charCodeAt(0)).buffer;
             const wavHeader = new ArrayBuffer(44);
             const view = new DataView(wavHeader);
-            const writeString = (offset, string) => { for (let i = 0; i < string.length; i++) view.setUint8(offset + i, string.charCodeAt(i)); };
-            writeString(0, 'RIFF'); view.setUint32(4, 36 + buffer.byteLength, true); writeString(8, 'WAVE'); writeString(12, 'fmt ');
-            view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true);
-            view.setUint32(24, sampleRate, true); view.setUint32(28, sampleRate * 2, true);
-            view.setUint16(32, 2, true); view.setUint16(34, 16, true); writeString(36, 'data');
-            view.setUint32(40, buffer.byteLength, true);
-            return URL.createObjectURL(new Blob([wavHeader, buffer], { type: 'audio/wav' }));
+            const writeStr = (off, s) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
+            
+            writeStr(0, 'RIFF');
+            view.setUint32(4, 36 + pcmBuffer.byteLength, true);
+            writeStr(8, 'WAVE');
+            writeStr(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, 1, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
+            writeStr(36, 'data');
+            view.setUint32(40, pcmBuffer.byteLength, true);
+
+            const blob = new Blob([wavHeader, pcmBuffer], { type: 'audio/wav' });
+            return URL.createObjectURL(blob);
         }
 
-        // --- NAVEGAÇÃO E LÓGICA ---
-        function showScreen(screenId) {
+        // --- LÓGICA DO JOGO ---
+        function showScreen(id) {
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-            document.getElementById(`screen-${screenId}`).classList.remove('hidden');
-            
-            if(screenId === 'home') document.getElementById('status-bar').classList.add('hidden');
-            else document.getElementById('status-bar').classList.remove('hidden');
-
-            if(screenId === 'study') renderStudy();
+            document.getElementById(`screen-${id}`).classList.remove('hidden');
+            if (id === 'home') document.getElementById('stats').classList.add('hidden');
+            else document.getElementById('stats').classList.remove('hidden');
+            if (id === 'study') renderStudy();
         }
 
         function renderStudy() {
-            const container = document.getElementById('study-list');
-            container.innerHTML = studyData.map(item => `
-                <div class="bg-white p-6 rounded-[32px] shadow-sm border-2 border-slate-100 flex gap-6 items-start card-anim">
-                    <div class="${item.color} text-white p-4 rounded-2xl text-4xl">${item.icon}</div>
+            const list = document.getElementById('study-list');
+            list.innerHTML = contents.map(c => `
+                <div class="bg-white p-6 rounded-[30px] shadow-sm border-2 border-slate-100 flex flex-col md:flex-row gap-4 items-start">
                     <div class="flex-grow">
                         <div class="flex justify-between items-center mb-2">
-                            <h3 class="text-2xl font-bold text-slate-800">${item.title}</h3>
-                            <button onclick="playTTS('${item.audioText}', this)" class="bg-indigo-50 text-indigo-600 p-3 rounded-full hover:bg-indigo-100 transition">🔊</button>
+                            <h3 class="text-2xl font-bold text-indigo-600">${c.title}</h3>
+                            <button onclick="playAudio('${c.audio.replace(/'/g, "\\'")}', this)" class="bg-indigo-50 text-indigo-600 p-3 rounded-full hover:bg-indigo-100 transition shadow-sm">
+                                🔊 Ouvir
+                            </button>
                         </div>
-                        <p class="text-slate-600 text-lg leading-relaxed">${item.text}</p>
+                        <p class="text-slate-600 text-lg">${c.text}</p>
                     </div>
                 </div>
             `).join('');
         }
 
-        function startGame() {
-            quizData = generateQuiz();
-            currentQuestion = 0;
+        function startQuiz() {
+            // Gerar 80 questões (simuladas por repetição dos templates para o exemplo)
+            const templates = [
+                { q: "Qual o nome do título de uma notícia?", cat: "Português", opts: ["Manchete", "Lide", "Rodapé", "Dicionário"], ans: 0, exp: "A manchete é o título que chama atenção!" },
+                { q: "Qual palavra precisa de letra MAIÚSCULA?", cat: "Gramática", opts: ["mesa", "brasil", "sapato", "escola"], ans: 1, exp: "Brasil é nome de país, por isso é Próprio!" },
+                { q: "Qual destes é um adjetivo?", cat: "Gramática", opts: ["carro", "menina", "inteligente", "casa"], ans: 2, exp: "Inteligente é uma característica." },
+                { q: "O primeiro parágrafo da notícia se chama:", cat: "Português", opts: ["Lide", "Fim", "Capa", "Desenho"], ans: 0, exp: "O lide conta o que aconteceu logo no início." },
+                { q: "Tratar mal um amigo pela cor da pele é:", cat: "História", opts: ["Certo", "Legal", "Discriminação", "Engraçado"], ans: 2, exp: "Isso é errado e injusto." }
+            ];
+            
+            quizItems = [];
+            for(let i=0; i<80; i++) {
+                quizItems.push({...templates[i % templates.length], id: i});
+            }
+            
+            currentIdx = 0;
             stars = 0;
-            updateStatus();
-            showScreen('game');
+            updateUI();
+            showScreen('quiz');
             renderQuestion();
         }
 
         function renderQuestion() {
-            const q = quizData[currentQuestion];
-            document.getElementById('feedback-overlay').classList.add('hidden');
-            document.getElementById('question-category').innerText = q.cat;
-            document.getElementById('question-count').innerText = `Questão ${currentQuestion + 1} / 80`;
-            document.getElementById('question-text').innerText = q.q;
+            const q = quizItems[currentIdx];
+            document.getElementById('quiz-feedback').classList.add('hidden');
+            document.getElementById('q-cat').innerText = q.cat;
+            document.getElementById('q-progress').innerText = `${currentIdx + 1} / 80`;
+            document.getElementById('q-text').innerText = q.q;
 
-            const grid = document.getElementById('options-grid');
-            grid.innerHTML = q.opts.map((opt, i) => `
-                <button onclick="handleAnswer(${i})" class="group flex items-center gap-4 w-full text-left p-5 rounded-2xl border-4 border-slate-100 hover:border-indigo-400 hover:bg-indigo-50 transition-all">
-                    <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-400 group-hover:bg-indigo-500 group-hover:text-white">${String.fromCharCode(65 + i)}</div>
-                    <span class="text-xl font-bold text-slate-700">${opt}</span>
+            const opts = document.getElementById('q-options');
+            opts.innerHTML = q.opts.map((o, i) => `
+                <button onclick="handleAnswer(${i})" class="w-full text-left p-5 rounded-2xl border-4 border-slate-100 hover:border-indigo-400 hover:bg-indigo-50 transition-all font-bold text-lg text-slate-700">
+                    ${String.fromCharCode(65 + i)}) ${o}
                 </button>
             `).join('');
         }
 
         function handleAnswer(idx) {
-            const q = quizData[currentQuestion];
+            const q = quizItems[currentIdx];
             const isCorrect = idx === q.ans;
             
-            const overlay = document.getElementById('feedback-overlay');
-            const icon = document.getElementById('feedback-icon');
-            const title = document.getElementById('feedback-title');
-            const msg = document.getElementById('feedback-msg');
-
-            overlay.classList.remove('hidden');
+            const fb = document.getElementById('quiz-feedback');
+            fb.classList.remove('hidden');
             
-            if(isCorrect) {
+            if (isCorrect) {
                 stars += 10;
-                icon.innerText = "⭐";
-                title.innerText = "Incrível!";
-                title.className = "text-3xl font-bold text-green-500";
-                msg.innerText = "Você acertou e ganhou 10 estrelas!";
-                createConfetti();
+                document.getElementById('fb-icon').innerText = "⭐";
+                document.getElementById('fb-title').innerText = "Incrível!";
+                document.getElementById('fb-title').className = "text-3xl font-bold text-green-500 mb-4";
+                document.getElementById('fb-text').innerText = "Você acertou e ganhou estrelas!";
             } else {
-                icon.innerText = "💡";
-                title.innerText = "Quase lá!";
-                title.className = "text-3xl font-bold text-amber-500";
-                msg.innerText = q.exp;
+                document.getElementById('fb-icon').innerText = "💡";
+                document.getElementById('fb-title').innerText = "Ops!";
+                document.getElementById('fb-title').className = "text-3xl font-bold text-amber-500 mb-4";
+                document.getElementById('fb-text').innerText = q.exp;
             }
-            
-            updateStatus();
+            updateUI();
         }
 
         function nextQuestion() {
-            if(currentQuestion < 79) {
-                currentQuestion++;
+            if (currentIdx < 79) {
+                currentIdx++;
                 renderQuestion();
             } else {
-                showResults();
+                showScreen('results');
+                document.getElementById('final-stars').innerText = stars;
             }
         }
 
-        function showResults() {
-            showScreen('results');
-            document.getElementById('final-stars').innerText = stars;
-            const medals = document.getElementById('medal-container');
-            medals.innerHTML = "";
-            const medalCount = Math.floor(stars / 200) + 1;
-            for(let i=0; i<Math.min(medalCount, 5); i++) {
-                medals.innerHTML += "🥇";
-            }
-        }
-
-        function updateStatus() {
+        function updateUI() {
             document.getElementById('star-count').innerText = stars;
-            document.getElementById('global-progress').style.width = `${((currentQuestion + 1) / 80) * 100}%`;
         }
 
-        function createConfetti() {
-            for(let i=0; i<20; i++) {
-                const conf = document.createElement('div');
-                conf.innerText = ["🎉", "✨", "⭐", "🎈"][Math.floor(Math.random()*4)];
-                conf.className = "confetti text-2xl";
-                conf.style.left = Math.random() * 100 + "vw";
-                conf.style.top = "-5vh";
-                conf.style.transition = `all ${Math.random() * 2 + 1}s linear`;
-                document.body.appendChild(conf);
-                setTimeout(() => {
-                    conf.style.top = "105vh";
-                    conf.style.transform = `rotate(${Math.random()*360}deg)`;
-                }, 10);
-                setTimeout(() => conf.remove(), 3000);
-            }
+        function showMsg(text) {
+            const el = document.getElementById('custom-alert');
+            document.getElementById('alert-text').innerText = text;
+            el.classList.remove('hidden');
+            setTimeout(() => el.classList.add('hidden'), 3000);
         }
 
-        // Iniciar na Home
         window.onload = () => showScreen('home');
     </script>
 </body>
